@@ -11,26 +11,31 @@ import 'leaflet/dist/leaflet.css';
 import { OpenStreetMapProvider, GeoSearchControl } from 'leaflet-geosearch';
 import 'leaflet-geosearch/dist/geosearch.css';
 import L from 'leaflet';
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41]
-});
+// Replace the L.icon definitions with custom SVG icons
+const createSvgIcon = (color) => {
+  const svgTemplate = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+      <circle cx="12" cy="10" r="3"></circle>
+    </svg>
+  `;
 
-L.Marker.prototype.options.icon = DefaultIcon;
+  const svgUrl = `data:image/svg+xml;base64,${btoa(svgTemplate)}`;
 
-const highlightedIcon = new Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-});
+  return new Icon({
+    iconUrl: svgUrl,
+    iconSize: [24, 24],
+    iconAnchor: [12, 24],
+    popupAnchor: [0, -24],
+  });
+};
+
+const defaultIcon = createSvgIcon('#2563eb'); // Blue
+const highlightedIcon = createSvgIcon('#ef4444'); // Red
+
+L.Marker.prototype.options.icon = defaultIcon;
+
 import PropTypes from 'prop-types';
 
 // Create a new MapEvents component to handle clicks
@@ -136,31 +141,10 @@ const MapNotebookApp = () => {
     }
   }, [points]);
 
-  // Add this new function after filterPoints
-  const fitMapToBounds = useCallback(() => {
-    if (map && filteredPoints.length > 0) {
-      const bounds = filteredPoints.reduce((bounds, point) => {
-        return bounds.extend([point.lat, point.lng]);
-      }, map.getBounds());
-      
-      map.fitBounds(bounds, {
-        padding: [50, 50], // Add some padding around the bounds
-        maxZoom: 15 // Prevent zooming in too close when there's only one result
-      });
-    }
-  }, [map, filteredPoints]);
-
   // Modify the existing filter points effect to separate the concerns
   useEffect(() => {
     filterPoints();
   }, [points, searchTerm, filterPoints]);
-
-  // Add a separate effect for bounds fitting that only runs when filteredPoints change
-  useEffect(() => {
-    if (searchTerm) {  // Only fit bounds when there's a search term
-      fitMapToBounds();
-    }
-  }, [filteredPoints, fitMapToBounds, searchTerm]);
 
   const handleMapClick = (e) => {
     setNewPoint({
