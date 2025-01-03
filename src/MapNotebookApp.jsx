@@ -12,7 +12,7 @@ import { OpenStreetMapProvider, GeoSearchControl } from 'leaflet-geosearch';
 import 'leaflet-geosearch/dist/geosearch.css';
 import L from 'leaflet';
 
-// Replace the L.icon definitions with custom SVG icons
+// Use custom svg for the marker icons.
 const createSvgIcon = (color) => {
   const svgTemplate = `
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -106,7 +106,6 @@ const MapNotebookApp = () => {
   const [editDescription, setEditDescription] = useState('');
   const [editTags, setEditTags] = useState('');
 
-  // Move filterPoints definition before the effects
   const filterPoints = useCallback(() => {
     const filtered = points.filter(point => {
       const descriptionMatch = point.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -141,7 +140,6 @@ const MapNotebookApp = () => {
     }
   }, [points]);
 
-  // Modify the existing filter points effect to separate the concerns
   useEffect(() => {
     filterPoints();
   }, [points, searchTerm, filterPoints]);
@@ -186,7 +184,6 @@ const MapNotebookApp = () => {
     }
   }, [map]);
 
-  // Move the event listener setup to useEffect
   useEffect(() => {
     if (map) {
       map.on('locationfound', handleLocationFound);
@@ -202,7 +199,6 @@ const MapNotebookApp = () => {
     }
   };
 
-  // Move this effect before the MapContainer render
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -346,7 +342,7 @@ const MapNotebookApp = () => {
                     <div className="p-2">
                       {editingPoint === point.id ? (
                         <>
-                          <div className="flex justify-end mb-2">
+                          <div className="flex justify-end mb-4">
                             <Button 
                               variant="ghost" 
                               size="sm" 
@@ -354,7 +350,6 @@ const MapNotebookApp = () => {
                                 e.stopPropagation();
                                 setEditingPoint(null);
                               }}
-                              className="absolute top-2 right-2"
                             >
                               <X className="h-4 w-4" />
                             </Button>
